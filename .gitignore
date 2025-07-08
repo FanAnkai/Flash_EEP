@@ -1,0 +1,30 @@
+main_project/MDK-ARM/main_project/
+
+
+
+History
+Project Outputs*
+Project Logs*
+__Previews
+*.htm
+*.html
+*.zip
+*.txt
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.map
+*.dep
+*.sct
+**/DebugConfig/
+*.uvguix.*
+*.Bak
+*.lnp
+*.lst
+*.uvoptx
+.vscode
+
+
