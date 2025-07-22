@@ -15,8 +15,8 @@ EEP_MAX_END_ADDR
 */
 
 
-#define EEP_DATA_BLOCK_NUM  (500)	//数据块数
-#define EEP_DATA_BLOCK_SIZE (128)	//每个数据块的大小
+#define EEP_DATA_BLOCK_NUM  (1024*3)	//数据块数
+#define EEP_DATA_BLOCK_SIZE (16)	//每个数据块的大小
 
 
 #define EEP_INDEX_ADDR      (0x08070000)

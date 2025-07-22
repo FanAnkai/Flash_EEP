@@ -62,8 +62,8 @@ static void MX_USART2_UART_Init(void);
 #include "string.h"
 #include "flash_eep.h"
 
-uint8_t write_buff[128];
-uint8_t read_buff[128];
+uint8_t write_buff[EEP_DATA_BLOCK_SIZE];
+uint8_t read_buff[EEP_DATA_BLOCK_SIZE];
 
 uint16_t eep_index = 0;
 uint8_t data = 1;
@@ -103,49 +103,67 @@ int main(void)
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
     /* USER CODE BEGIN 2 */
-    
-    HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
-    HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-    
+
+    RS485_TX_EN();
+    HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+
 //    while(run_flag == 0)
 //    {
 //        HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
 //        HAL_Delay(100);
 //    }
-    
+
     if(run_flag == 1)
     {
         eep_erase_page(EEP_INDEX_ADDR, EEP_PAGE_COUNT);
     }
-    
+
     HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-    
-    
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+
+    uint32_t task_cnt = 0;
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
     {
-        memset(write_buff, data, sizeof(write_buff));
-        memset(read_buff, 0, sizeof(read_buff));
         
+        
+
         eep_index = eep_get_write_index();
-        eep_write_data(0, write_buff, sizeof(write_buff));
-        eep_read_data(0, read_buff, sizeof(read_buff));
         
-        if(memcmp(read_buff, write_buff, sizeof(read_buff)) != 0)
+        memset(read_buff, 0, EEP_DATA_BLOCK_SIZE);
+        eep_read_data(0, read_buff, EEP_DATA_BLOCK_SIZE);
+        
+        memset(write_buff, read_buff[0] + 1, EEP_DATA_BLOCK_SIZE);
+        eep_write_data(0, write_buff, EEP_DATA_BLOCK_SIZE);
+        
+        memset(read_buff, 0, EEP_DATA_BLOCK_SIZE);
+        eep_read_data(0, read_buff, EEP_DATA_BLOCK_SIZE);
+
+        if(memcmp(read_buff, write_buff, EEP_DATA_BLOCK_SIZE) != 0)
         {
+            HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
             while(1)
             {
+                uint32_t err_addr = EEP_DATA_ADDR + (eep_index - 1) * EEP_DATA_BLOCK_SIZE;
+                printf("eep_index = %u addr = 0x%x\r\n", eep_index, err_addr);
                 HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
-                HAL_Delay(100);
+                HAL_Delay(1000);
             }
         }
-        
-        data++;
-        HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-        HAL_Delay(1000);
+
+        data = read_buff[0] + 1;
+        task_cnt++;
+        if(task_cnt % 2 == 0)
+        {
+            HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+        }
+        printf("eep_index = %d\r\n", eep_index);
+        HAL_Delay(10);
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */

@@ -87,8 +87,8 @@ inline void RS485_TX_EN(void)
 
 inline int fputc(int ch, FILE* f)
 {
-    RS485_TX_EN();
-    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 1000);
+    //RS485_TX_EN();
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 1000);
     //RS485_RX_EN();
 	return ch;
 }
